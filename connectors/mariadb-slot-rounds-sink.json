@@ -1,0 +1,21 @@
+{
+  "name": "mariadb-slot-rounds-sink",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "6",
+    "topics": "slot_rounds",
+    "connection.url": "jdbc:mariadb://mariadb:3306/ordersdb?user=orders&password=orders",
+    "insert.mode": "insert", 
+    "pk.mode": "record_value",
+    "pk.fields": "round_id",
+    "table.name.format": "slot_rounds",
+    "auto.create": "false",
+    "batch.size": "2000",
+    "max.retries": "10",
+    "retry.backoff.ms": "3000",
+    "delete.enabled": "false",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "true",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter"
+  }
+}

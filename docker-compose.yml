@@ -26,7 +26,9 @@ services:
     restart: unless-stopped
 
   kafka-connect:
-    image: confluentinc/cp-kafka-connect:7.6.0
+    build:
+      context: .
+      dockerfile: Dockerfile.kafka-connect
     depends_on:
       - kafka
       - mariadb
@@ -50,22 +52,6 @@ services:
       CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
       CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
       CONNECT_PLUGIN_PATH: /usr/share/java,/usr/share/confluent-hub-components
-    command:
-      - bash
-      - -c
-      - |
-        echo "Installing JDBC connector..."
-        confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:10.8.0
-        echo "Fetching MariaDB JDBC driver (not bundled with kafka-connect-jdbc)..."
-        curl -sSL -o /usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc/lib/mariadb-java-client.jar \
-          https://repo1.maven.org/maven2/org/mariadb/jdbc/mariadb-java-client/3.4.1/mariadb-java-client-3.4.1.jar
-        echo "Installing Redis connector..."
-        # pinned to 0.9.1: 1.0+ ships Java 17 bytecode, incompatible with this
-        # image's Java 11 runtime (plugin loads but the scanner finds 0 classes)
-        curl -sSL -o /tmp/redis-kafka-connect.zip \
-          https://github.com/redis-field-engineering/redis-kafka-connect/releases/download/v0.9.1/redis-redis-kafka-connect-0.9.1.zip
-        confluent-hub install --no-prompt /tmp/redis-kafka-connect.zip
-        /etc/confluent/docker/run
 
   mariadb:
     image: mariadb:11.4

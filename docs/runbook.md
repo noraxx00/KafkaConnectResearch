@@ -7,7 +7,7 @@ All commands below assume a working directory of `kafka-test/` unless stated oth
 docker compose up -d --force-recreate kafka
 docker compose logs -f kafka   # wait for it to fully boot before continuing
 
-docker compose up -d kafka-connect
+docker compose up -d --build kafka-connect   # --build picks up Dockerfile.kafka-connect changes
 curl -s localhost:8083/connectors   # wait until it responds
 ```
 
@@ -37,7 +37,7 @@ docker compose exec mariadb mariadb -uorders -porders ordersdb -e "ALTER TABLE s
 The Redis connector plugin is pinned to **v0.9.1** — 1.0+ ships Java 17 bytecode, which silently fails to load under this image's Java 11 runtime (the plugin registers on the plugin path, but the class scanner finds 0 classes). Revisit this pin if the `kafka-connect` image is ever bumped to a Java 17 base.
 
 ```powershell
-docker compose up -d --force-recreate kafka-connect   # re-runs the plugin install steps in the compose command
+docker compose up -d --build --force-recreate kafka-connect   # rebuilds from Dockerfile.kafka-connect if it changed
 docker compose logs -f kafka-connect
 
 # confirm the plugin actually loaded

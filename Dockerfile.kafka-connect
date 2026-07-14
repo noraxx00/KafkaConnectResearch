@@ -1,0 +1,14 @@
+FROM confluentinc/cp-kafka-connect:7.6.0
+
+# kafka-connect-jdbc doesn't bundle a MariaDB driver — fetch it separately and
+# drop it into the plugin's own lib/ dir so the classloader picks it up.
+RUN confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:10.8.0 \
+    && curl -sSL -o /usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc/lib/mariadb-java-client.jar \
+       https://repo1.maven.org/maven2/org/mariadb/jdbc/mariadb-java-client/3.4.1/mariadb-java-client-3.4.1.jar
+
+# pinned to 0.9.1: 1.0+ ships Java 17 bytecode, incompatible with this
+# image's Java 11 runtime (plugin loads but the scanner finds 0 classes)
+RUN curl -sSL -o /tmp/redis-kafka-connect.zip \
+       https://github.com/redis-field-engineering/redis-kafka-connect/releases/download/v0.9.1/redis-redis-kafka-connect-0.9.1.zip \
+    && confluent-hub install --no-prompt /tmp/redis-kafka-connect.zip \
+    && rm /tmp/redis-kafka-connect.zip
